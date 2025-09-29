@@ -1,0 +1,28 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Копируем common файлы
+COPY common/requirements.txt .
+COPY common/db_connect.py .
+COPY common/.env.example .
+COPY common/.gitignore .
+
+# Копируем все подпроекты
+COPY ml/ ./ml/
+COPY dl/ ./dl/
+COPY ab/ ./ab/
+
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+# Аргумент для выбора папки (ml, dl, ab)
+ARG PROJECT=ml
+ENV PROJECT=${PROJECT}
+
+# Аргумент для выбора файла (app.py, service.py, service3.py)
+ARG SERVICE_FILE=app.py
+ENV SERVICE_FILE=${SERVICE_FILE}
+
+# Запуск нужного файла в нужной папке
+CMD ["bash", "-c", "python $PROJECT/$SERVICE_FILE"]
